@@ -35,4 +35,5 @@ jobs:
       run: |
         pytest
     - name: Run!
+      run: |
         python3 general-spider.py
