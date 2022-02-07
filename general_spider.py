@@ -65,7 +65,7 @@ def wiki_spider(stop_num, url,cate):
             len_list.append(len(link_list))
             
             # Stop Conditions
-            if len_list[-1] == len_list[-3]:
+            if len_list[-1] == len_list[-6]:
                 break
             if len(link_list) > stop_num:
                 break
@@ -159,10 +159,19 @@ def wiki_spider(stop_num, url,cate):
     wiki_search(wiki_names)
 
 #wiki_spider(20000,"https://marvel.fandom.com","marvel")
-wiki_spider(20000,"https://sonic.fandom.com","sonic")
-wiki_spider(20000,"https://starcraft.fandom.com","starcraft")
-wiki_spider(20000,"https://spiderman.fandom.com","spiderman")
-wiki_spider(20000,"https://stargate.fandom.com","stargate")
-wiki_spider(20000,"https://starwars.fandom.com","starwars")
+#wiki_spider(20000,"https://sonic.fandom.com","sonic")
+#wiki_spider(20000,"https://starcraft.fandom.com","starcraft")
+#wiki_spider(20000,"https://spiderman.fandom.com","spiderman")
+#wiki_spider(20000,"https://stargate.fandom.com","stargate")
+#wiki_spider(20000,"https://starwars.fandom.com","starwars")
+wiki_spider(20000,"https://fantendo.fandom.com","fantendo")
+wiki_spider(20000,"https://femalevillains.fandom.com","femalevillains")
+wiki_spider(20000,"https://fightingfantasy.fandom.com","fightingfantasy")
+wiki_spider(20000,"https://finalfantasy.fandom.com","finalfantasy")
+wiki_spider(20000,"https://ffxiclopedia.fandom.com","ffxiclopedia")
+wiki_spider(20000,"https://fireemblem.fandom.com","fireemblem")
+wiki_spider(20000,"https://forgottenrealms.fandom.com","forgottenrealms")
+wiki_spider(20000,"https://fortnite.fandom.com","fortnite")
+
 
 cursor.close()
