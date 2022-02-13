@@ -164,14 +164,21 @@ def wiki_spider(stop_num, url,cate):
 #wiki_spider(20000,"https://spiderman.fandom.com","spiderman")
 #wiki_spider(20000,"https://stargate.fandom.com","stargate")
 #wiki_spider(20000,"https://starwars.fandom.com","starwars")
-wiki_spider(20000,"https://fantendo.fandom.com","fantendo")
-wiki_spider(20000,"https://femalevillains.fandom.com","femalevillains")
-wiki_spider(20000,"https://fightingfantasy.fandom.com","fightingfantasy")
-wiki_spider(20000,"https://finalfantasy.fandom.com","finalfantasy")
-wiki_spider(20000,"https://ffxiclopedia.fandom.com","ffxiclopedia")
-wiki_spider(20000,"https://fireemblem.fandom.com","fireemblem")
-wiki_spider(20000,"https://forgottenrealms.fandom.com","forgottenrealms")
-wiki_spider(20000,"https://fortnite.fandom.com","fortnite")
+#wiki_spider(20000,"https://fantendo.fandom.com","fantendo")
+#wiki_spider(20000,"https://femalevillains.fandom.com","femalevillains")
+#wiki_spider(20000,"https://fightingfantasy.fandom.com","fightingfantasy")
+#wiki_spider(20000,"https://finalfantasy.fandom.com","finalfantasy")
+#wiki_spider(20000,"https://ffxiclopedia.fandom.com","ffxiclopedia")
+#wiki_spider(20000,"https://fireemblem.fandom.com","fireemblem")
+#wiki_spider(20000,"https://forgottenrealms.fandom.com","forgottenrealms")
+wiki_spider(20000,"https://wowpedia.fandom.com/","wowpedia")
+wiki_spider(20000,"https://runescape.fandom.com/","runescape")
+wiki_spider(20000,"https://tvdatabase.fandom.com/","tv")
+wiki_spider(20000,"https://tardis.fandom.com/","doctorwho")
+wiki_spider(20000,"https://fortnite.fandom.com/","fortnite")
+
+
+
 
 
 cursor.close()
