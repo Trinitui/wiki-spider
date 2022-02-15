@@ -130,17 +130,17 @@ def wiki_spider(stop_num, url,cate):
                 for tag in soup.findAll(True):
                     length += int(len(soup.find(tag.name).text))
                 
-                print("Found title ",title, " for ",URL)
-                print("Found categories ",cat_list, " for ",URL)
-                print("Found length ",length, " for ",el)
+                #print("Found title ",title, " for ",URL)
+                #print("Found categories ",cat_list, " for ",URL)
+                #print("Found length ",length, " for ",el)
                 
-                print("Putting data into DB")
+                #print("Putting data into DB")
                 
                 try:
                     sql = "INSERT INTO wiki_scraping_data_stage (title,categories,length,type) VALUES (%s,%s,%s,%s)"
                     val = (str(title),str(cat_list),int(length),str(cate))
                     cursor.execute(sql, val)
-                    print("Data inserted into DB!")
+                    print(f"Data: {title}, {cat_list}, {length} inserted into DB for {el}")
                 except mysql.connector.Error as err:
                     print(err)
             
@@ -171,11 +171,14 @@ def wiki_spider(stop_num, url,cate):
 #wiki_spider(20000,"https://ffxiclopedia.fandom.com","ffxiclopedia")
 #wiki_spider(20000,"https://fireemblem.fandom.com","fireemblem")
 #wiki_spider(20000,"https://forgottenrealms.fandom.com","forgottenrealms")
-wiki_spider(20000,"https://wowpedia.fandom.com/","wowpedia")
-wiki_spider(20000,"https://runescape.fandom.com/","runescape")
-wiki_spider(20000,"https://tvdatabase.fandom.com/","tv")
-wiki_spider(20000,"https://tardis.fandom.com/","doctorwho")
-wiki_spider(20000,"https://fortnite.fandom.com/","fortnite")
+#wiki_spider(20000,"https://wowpedia.fandom.com/","wowpedia")
+#wiki_spider(20000,"https://runescape.fandom.com/","runescape")
+#wiki_spider(20000,"https://tvdatabase.fandom.com/","tv")
+#wiki_spider(20000,"https://tardis.fandom.com/","doctorwho")
+#wiki_spider(20000,"https://fortnite.fandom.com/","fortnite")
+wiki_spider(20000,"https://zelda.fandom.com/","zelda")
+wiki_spider(20000,"https://harrypotter.fandom.com/","harrypotter")
+wiki_spider(20000,"callofduty.fandom.com","callofduty")
 
 
 
