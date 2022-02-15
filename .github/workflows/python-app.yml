@@ -30,4 +30,3 @@ jobs:
     steps: 
       - name: execute py script # run 
         run: python general_spider.py
-you
