@@ -23,8 +23,10 @@ except mysql.connector.Error as err:
 cursor = cnx.cursor()
 
 
-
-# This is for fandom sites!
+# This is hardcoded to work for fandom sites, mostly because of string manipulation. 
+# I may just store the whole page as a blob in the future though... And in that case 
+# I will update this comment 
+# - 2/2022
 
 def wiki_spider(stop_num, url,cate): 
     URL= url
@@ -65,10 +67,15 @@ def wiki_spider(stop_num, url,cate):
             len_list.append(len(link_list))
             
             # Stop Conditions
+            # This next if is important as it determines the "soft threshold" for when the script should move on
+            # i.e. if the last 6 entries in the list are the same, kill it and move on to extracting data.
             if len_list[-1] == len_list[-6]:
                 break
+
+            # General stop based on the "absolute threshold" given in the original function call
             if len(link_list) > stop_num:
                 break
+
         except:
             print("skipping: ",el)
             #link_list = list(set(link_list))
@@ -119,9 +126,9 @@ def wiki_spider(stop_num, url,cate):
                 categories = soup.findAll("li", {"class": "category normal"})
                 categories = str(categories).split(">")
                 cat_list = []
-                for el in categories:
-                    if "Category:" in el:
-                        a = el.split("Category:")[1]
+                for elc in categories:
+                    if "Category:" in elc:
+                        a = elc.split("Category:")[1]
                         a = a.split('"')[0]
                         cat_list.append(a)
                 
@@ -140,7 +147,7 @@ def wiki_spider(stop_num, url,cate):
                     sql = "INSERT INTO wiki_scraping_data_stage (title,categories,length,type) VALUES (%s,%s,%s,%s)"
                     val = (str(title),str(cat_list),int(length),str(cate))
                     cursor.execute(sql, val)
-                    print(f"Data: {title}, {cat_list}, {length} inserted into DB for {el}")
+                    print(f"Data: {title}, {cat_list}, {length} inserted into DB for {URL}")
                 except mysql.connector.Error as err:
                     print(err)
             
@@ -176,10 +183,20 @@ def wiki_spider(stop_num, url,cate):
 #wiki_spider(20000,"https://tvdatabase.fandom.com/","tv")
 #wiki_spider(20000,"https://tardis.fandom.com/","doctorwho")
 #wiki_spider(20000,"https://fortnite.fandom.com/","fortnite")
-wiki_spider(20000,"https://zelda.fandom.com/","zelda")
-wiki_spider(20000,"https://harrypotter.fandom.com/","harrypotter")
-wiki_spider(20000,"callofduty.fandom.com","callofduty")
+#wiki_spider(20000,"https://zelda.fandom.com/","zelda")
+#wiki_spider(20000,"https://harrypotter.fandom.com/","harrypotter")
+#wiki_spider(20000,"callofduty.fandom.com","callofduty")
 
+wiki_spider(20000,"https://logos.fandom.com/","logos")
+wiki_spider(20000,"https://icehockey.fandom.com/","icehockey")
+wiki_spider(20000,"https://althistory.fandom.com/","althistory")
+wiki_spider(20000,"https://eq2.fandom.com/","eq2")
+wiki_spider(20000,"https://lostmediaarchive.fandom.com/","lostmediaarchive")
+
+
+
+
+#wiki_spider(20000,"","")
 
 
 
