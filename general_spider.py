@@ -6,7 +6,6 @@ import mysql.connector
 from mysql.connector import errorcode
 
 # Connect to Amazon DB
-
 try:
   cnx =mysql.connector.connect(user='admin', password='andrewwikiscrape12345',
                               host='wiki-scrape.c3khuyuubsmy.us-east-2.rds.amazonaws.com',
@@ -24,8 +23,7 @@ cursor = cnx.cursor()
 
 
 # This is hardcoded to work for fandom sites, mostly because of string manipulation. 
-# I may just store the whole page as a blob in the future though... And in that case 
-# I will update this comment 
+# Whole page is being stored as a blob in the DB
 # - 2/2022
 
 def wiki_spider(stop_num, url,cate): 
@@ -82,9 +80,10 @@ def wiki_spider(stop_num, url,cate):
     cnx.commit()
 
 
+    # Store data in DB
     link_list = list(set(link_list))
     print(link_list)
-    print("Storing for later...")
+    print(f"Storing {len(link_list)} items for later...")
     for el in link_list:
         try:
             sql = "INSERT INTO wiki_scraping_links_stage (link, type) VALUES (%s, %s)"
@@ -93,14 +92,12 @@ def wiki_spider(stop_num, url,cate):
         except mysql.connector.Error as err:
             print(err)
 
-
-    print("Dumping list to disk")
-    textfile = open(f"{cate}_links_to_check.txt", "w")
-    for element in link_list:
-        textfile.write(f"{element}\n")
-    textfile.close()
-    print(f"Dumped {len(link_list)} links to disk. Ready for scraping.")
-    print(f"see {cate}_links_to_check.txt for more details")
+    
+    # Older storage code - stored data locally in a txt file. 
+    #textfile = open(f"{cate}_links_to_check.txt", "w")
+    #for element in link_list:
+    #    textfile.write(f"{element}\n")
+    #textfile.close()
 
 
     def wiki_search(cate_list):
@@ -115,7 +112,7 @@ def wiki_spider(stop_num, url,cate):
                 print("Trying: ",URL)
                 page = requests.get(URL)
                 soup = BeautifulSoup(page.content, "html.parser")
-                #print("Done with grabbing soup for ",URL)
+
 
                 # Scraping elements on the page to find what we need and saving to vars
                 title = soup.find("h1",{"class":"page-header__title"})
@@ -137,15 +134,13 @@ def wiki_spider(stop_num, url,cate):
                 for tag in soup.findAll(True):
                     length += int(len(soup.find(tag.name).text))
                 
-                #print("Found title ",title, " for ",URL)
-                #print("Found categories ",cat_list, " for ",URL)
-                #print("Found length ",length, " for ",el)
-                
-                #print("Putting data into DB")
-                
+
+                if title == "Badtitle":
+                    title = el
+
                 try:
-                    sql = "INSERT INTO wiki_scraping_data_stage (title,categories,length,type) VALUES (%s,%s,%s,%s)"
-                    val = (str(title),str(cat_list),int(length),str(cate))
+                    sql = "INSERT INTO wiki_scraping_data_stage (title,categories,length,type,full_html,timestamp) VALUES (%s,%s,%s,%s,%s,%s)"
+                    val = (str(title),str(cat_list),int(length),str(cate),str(soup),str(datetime.datetime.now()))
                     cursor.execute(sql, val)
                     print(f"Data: {title}, {cat_list}, {length} inserted into DB for {URL}")
                 except mysql.connector.Error as err:
@@ -161,44 +156,42 @@ def wiki_spider(stop_num, url,cate):
         print("Time at end: ", ct)
         
 
-
-    wiki_names = open(f"{cate}_links_to_check.txt","r").readlines()
+    # Relates to old storage code - 
+    #wiki_names = open(f"{cate}_links_to_check.txt","r").readlines()
+    
+    wiki_names = link_list
     wiki_search(wiki_names)
 
-#wiki_spider(20000,"https://marvel.fandom.com","marvel")
-#wiki_spider(20000,"https://sonic.fandom.com","sonic")
-#wiki_spider(20000,"https://starcraft.fandom.com","starcraft")
-#wiki_spider(20000,"https://spiderman.fandom.com","spiderman")
-#wiki_spider(20000,"https://stargate.fandom.com","stargate")
-#wiki_spider(20000,"https://starwars.fandom.com","starwars")
-#wiki_spider(20000,"https://fantendo.fandom.com","fantendo")
-#wiki_spider(20000,"https://femalevillains.fandom.com","femalevillains")
-#wiki_spider(20000,"https://fightingfantasy.fandom.com","fightingfantasy")
-#wiki_spider(20000,"https://finalfantasy.fandom.com","finalfantasy")
-#wiki_spider(20000,"https://ffxiclopedia.fandom.com","ffxiclopedia")
-#wiki_spider(20000,"https://fireemblem.fandom.com","fireemblem")
-#wiki_spider(20000,"https://forgottenrealms.fandom.com","forgottenrealms")
-#wiki_spider(20000,"https://wowpedia.fandom.com/","wowpedia")
-#wiki_spider(20000,"https://runescape.fandom.com/","runescape")
-#wiki_spider(20000,"https://tvdatabase.fandom.com/","tv")
-#wiki_spider(20000,"https://tardis.fandom.com/","doctorwho")
-#wiki_spider(20000,"https://fortnite.fandom.com/","fortnite")
-#wiki_spider(20000,"https://zelda.fandom.com/","zelda")
-#wiki_spider(20000,"https://harrypotter.fandom.com/","harrypotter")
-#wiki_spider(20000,"callofduty.fandom.com","callofduty")
+# These did not capture full HTML or timestamps
+    #wiki_spider(20000,"https://marvel.fandom.com","marvel")
+    #wiki_spider(20000,"https://sonic.fandom.com","sonic")
+    #wiki_spider(20000,"https://starcraft.fandom.com","starcraft")
+    #wiki_spider(20000,"https://spiderman.fandom.com","spiderman")
+    #wiki_spider(20000,"https://stargate.fandom.com","stargate")
+    #wiki_spider(20000,"https://starwars.fandom.com","starwars")
+    #wiki_spider(20000,"https://fantendo.fandom.com","fantendo")
+    #wiki_spider(20000,"https://femalevillains.fandom.com","femalevillains")
+    #wiki_spider(20000,"https://fightingfantasy.fandom.com","fightingfantasy")
+    #wiki_spider(20000,"https://finalfantasy.fandom.com","finalfantasy")
+    #wiki_spider(20000,"https://ffxiclopedia.fandom.com","ffxiclopedia")
+    #wiki_spider(20000,"https://fireemblem.fandom.com","fireemblem")
+    #wiki_spider(20000,"https://forgottenrealms.fandom.com","forgottenrealms")
 
-wiki_spider(20000,"https://logos.fandom.com/","logos")
-wiki_spider(20000,"https://icehockey.fandom.com/","icehockey")
-wiki_spider(20000,"https://althistory.fandom.com/","althistory")
-wiki_spider(20000,"https://eq2.fandom.com/","eq2")
-wiki_spider(20000,"https://lostmediaarchive.fandom.com/","lostmediaarchive")
+    # These will need to be re-run because of trailing /
+        #wiki_spider(20000,"https://wowpedia.fandom.com/","wowpedia")
+        #wiki_spider(20000,"https://runescape.fandom.com/","runescape")
+        #wiki_spider(20000,"https://tvdatabase.fandom.com/","tv")
+        #wiki_spider(20000,"https://tardis.fandom.com/","doctorwho")
+        #wiki_spider(20000,"https://fortnite.fandom.com/","fortnite")
+        #wiki_spider(20000,"https://zelda.fandom.com/","zelda")
+        #wiki_spider(20000,"https://harrypotter.fandom.com/","harrypotter")
+        #wiki_spider(20000,"callofduty.fandom.com","callofduty")
+        #wiki_spider(20000,"https://logos.fandom.com/","logos")
 
-
-
-
-#wiki_spider(20000,"","")
-
-
+wiki_spider(20000,"https://icehockey.fandom.com","icehockey")
+wiki_spider(20000,"https://althistory.fandom.com","althistory")
+wiki_spider(20000,"https://eq2.fandom.com","eq2")
+wiki_spider(20000,"https://lostmediaarchive.fandom.com","lostmediaarchive")
 
 
 cursor.close()
