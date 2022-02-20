@@ -24,7 +24,7 @@ cursor = cnx.cursor()
 
 # This is hardcoded to work for fandom sites, mostly because of string manipulation. 
 # Whole page is being stored as a blob in the DB
-# - 2/2022
+# - 2/20/2022
 
 def wiki_spider(stop_num, url,cate): 
     URL= url
@@ -61,24 +61,71 @@ def wiki_spider(stop_num, url,cate):
                 if a[0] == "/":
                     link_list.append(a)
             link_list = list(set(link_list))
-            print("Length of list after some recursive scraping: ",len(link_list))
-            len_list.append(len(link_list))
+            print("Length of list after some recursive scraping: ",lll)
+            print(link_list[-1])
+            
             
             # Stop Conditions
-            # This next if is important as it determines the "soft threshold" for when the script should move on
-            # i.e. if the last 6 entries in the list are the same, kill it and move on to extracting data.
-            if len_list[-1] == len_list[-6]:
-                break
+            
 
             # General stop based on the "absolute threshold" given in the original function call
             if len(link_list) > stop_num:
                 break
 
-        except:
-            print("skipping: ",el)
-            #link_list = list(set(link_list))
-    cnx.commit()
+            # This next if is important as it determines the "soft threshold" for when the script should move on
+            # i.e. if the size of the list hasn't changed during the past 50 scrapes, kill it and move on to extracting data.
+            
+            len_list.append(lll)
+            if lll > 50:
+                if len_list[-1] == len_list[-50]:
+                    break
 
+        except Exception as err:
+            print(err)
+            print("skipping: ",el)
+
+            #link_list = list(set(link_list))
+    
+    
+    # Yes, I am running this code block twice. Don't start. 
+    for el in link_list:
+        lll = len(link_list)
+        try: 
+            URL= f"{url}{el}"
+            print("Trying... ",f"{url}{el}")
+            page = requests.get(URL)
+            soup = BeautifulSoup(page.content, "html.parser")
+            links = soup.find_all("a",href = True)
+            for link in links:
+                a = str(link).split("href=")[1]
+                a = a.split('"')
+                a = a[1]
+                if a[0] == "/":
+                    link_list.append(a)
+            link_list = list(set(link_list))
+            print("Length of list after some recursive scraping: ",lll)
+            
+            
+            # Stop Conditions
+            
+
+            # General stop based on the "absolute threshold" given in the original function call
+            if len(link_list) > stop_num:
+                break
+
+            # This next if is important as it determines the "soft threshold" for when the script should move on
+            # i.e. if the size of the list hasn't changed during the past 50 scrapes, kill it and move on to extracting data.
+            
+            len_list.append(lll)
+            if lll > 50:
+                if len_list[-1] == len_list[-50]:
+                    break
+
+        except Exception as err:
+            print(err)
+            print("skipping: ",el)
+
+            #link_list = list(set(link_list))
 
     # Store data in DB
     link_list = list(set(link_list))
@@ -91,7 +138,7 @@ def wiki_spider(stop_num, url,cate):
             cursor.execute(sql, val)
         except mysql.connector.Error as err:
             print(err)
-
+    cnx.commit()
     
     # Older storage code - stored data locally in a txt file. 
     #textfile = open(f"{cate}_links_to_check.txt", "w")
@@ -184,14 +231,16 @@ def wiki_spider(stop_num, url,cate):
         #wiki_spider(20000,"https://tardis.fandom.com/","doctorwho")
         #wiki_spider(20000,"https://fortnite.fandom.com/","fortnite")
         #wiki_spider(20000,"https://zelda.fandom.com/","zelda")
-        #wiki_spider(20000,"https://harrypotter.fandom.com/","harrypotter")
-        #wiki_spider(20000,"callofduty.fandom.com","callofduty")
-        #wiki_spider(20000,"https://logos.fandom.com/","logos")
 
-wiki_spider(20000,"https://icehockey.fandom.com","icehockey")
-wiki_spider(20000,"https://althistory.fandom.com","althistory")
-wiki_spider(20000,"https://eq2.fandom.com","eq2")
-wiki_spider(20000,"https://lostmediaarchive.fandom.com","lostmediaarchive")
+
+#wiki_spider(20000,"https://icehockey.fandom.com","icehockey")
+#wiki_spider(20000,"https://althistory.fandom.com","althistory")
+#wiki_spider(20000,"https://eq2.fandom.com","eq2")
+#wiki_spider(20000,"https://lostmediaarchive.fandom.com","lostmediaarchive")
+
+wiki_spider(20000,"https://zelda.fandom.com","zelda")
+wiki_spider(20000,"https://harrypotter.fandom.com","harrypotter")
+wiki_spider(20000,"https://callofduty.fandom.com","callofduty")
 
 
 cursor.close()
