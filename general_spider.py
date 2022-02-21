@@ -32,7 +32,8 @@ def wiki_spider(stop_num, url,cate):
     soup = BeautifulSoup(page.content, "html.parser")
 
     link_list = []
-
+    
+    # Seed list, Execution 0. Find links just looking at home page.
     links = soup.find_all("a",href = True)
     for link in links:
         a = str(link).split("href=")[1]
@@ -46,6 +47,7 @@ def wiki_spider(stop_num, url,cate):
     lll = 0
     len_list = []
 
+    # Execution 1 - building off of seed list. Typically takes a list of 130 pages to a list of 9000 pages
     for el in link_list:
         lll = len(link_list)
         try: 
@@ -60,26 +62,11 @@ def wiki_spider(stop_num, url,cate):
                 a = a[1]
                 if a[0] == "/":
                     link_list.append(a)
+            
             link_list = list(set(link_list))
             print("Length of list after some recursive scraping: ",lll)
-            print(link_list[-1])
+            #print(link_list[-1])
             
-            
-            # Stop Conditions
-            
-
-            # General stop based on the "absolute threshold" given in the original function call
-            if len(link_list) > stop_num:
-                break
-
-            # This next if is important as it determines the "soft threshold" for when the script should move on
-            # i.e. if the size of the list hasn't changed during the past 50 scrapes, kill it and move on to extracting data.
-            
-            len_list.append(lll)
-            if lll > 50:
-                if len_list[-1] == len_list[-50]:
-                    break
-
         except Exception as err:
             print(err)
             print("skipping: ",el)
@@ -87,7 +74,7 @@ def wiki_spider(stop_num, url,cate):
             #link_list = list(set(link_list))
     
     
-    # Yes, I am running this code block twice. Don't start. 
+    # Execution 2. This almost always hits your user defined limit and scrapes a ton of pages. 
     for el in link_list:
         lll = len(link_list)
         try: 
@@ -238,7 +225,7 @@ def wiki_spider(stop_num, url,cate):
 #wiki_spider(20000,"https://eq2.fandom.com","eq2")
 #wiki_spider(20000,"https://lostmediaarchive.fandom.com","lostmediaarchive")
 
-wiki_spider(20000,"https://zelda.fandom.com","zelda")
+#wiki_spider(20000,"https://zelda.fandom.com","zelda")
 wiki_spider(20000,"https://harrypotter.fandom.com","harrypotter")
 wiki_spider(20000,"https://callofduty.fandom.com","callofduty")
 
