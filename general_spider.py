@@ -225,8 +225,9 @@ def wiki_spider(stop_num, url,cate):
 #wiki_spider(20000,"https://eq2.fandom.com","eq2")
 #wiki_spider(20000,"https://lostmediaarchive.fandom.com","lostmediaarchive")
 
+#   Re-run these 
 #wiki_spider(20000,"https://zelda.fandom.com","zelda")
-wiki_spider(20000,"https://harrypotter.fandom.com","harrypotter")
+#wiki_spider(20000,"https://harrypotter.fandom.com","harrypotter")
 wiki_spider(20000,"https://callofduty.fandom.com","callofduty")
 
 
