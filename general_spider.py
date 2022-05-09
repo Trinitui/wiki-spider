@@ -62,7 +62,11 @@ def wiki_spider(stop_num, url,cate):
                 a = a[1]
                 if a[0] == "/":
                     link_list.append(a)
+            if int(len(link_list)) > int(stop_num):
+                print("Hit Threshold, stopping")
+                break
             
+
             link_list = list(set(link_list))
             print("Length of list after some recursive scraping: ",lll)
             #print(link_list[-1])
@@ -89,40 +93,29 @@ def wiki_spider(stop_num, url,cate):
                 a = a[1]
                 if a[0] == "/":
                     link_list.append(a)
+
             link_list = list(set(link_list))
-            print("Length of list after some recursive scraping: ",lll)
+            print("Length of list after some recursive scraping: ",len(link_list))
             
-            
-            # Stop Conditions
-            
-
-            # General stop based on the "absolute threshold" given in the original function call
-            if len(link_list) > stop_num:
+            if int(len(link_list)) > int(stop_num):
+                print("Hit Threshold, stopping")
                 break
-
-            # This next if is important as it determines the "soft threshold" for when the script should move on
-            # i.e. if the size of the list hasn't changed during the past 50 scrapes, kill it and move on to extracting data.
-            
-            len_list.append(lll)
-            if lll > 50:
-                if len_list[-1] == len_list[-50]:
-                    break
 
         except Exception as err:
             print(err)
             print("skipping: ",el)
 
-            #link_list = list(set(link_list))
-
     # Store data in DB
     link_list = list(set(link_list))
-    print(link_list)
-    print(f"Storing {len(link_list)} items for later...")
-    for el in link_list:
+    #print(link_list)
+    print(f"==========   Storing {len(link_list)} items for later   ==========")
+    for ind,el in enumerate(link_list):
         try:
             sql = "INSERT INTO wiki_scraping_links_stage (link, type) VALUES (%s, %s)"
             val = (str(el), str(cate))
             cursor.execute(sql, val)
+            if ind % 100 == 0:
+                print(f"Done with {ind} items")
         except mysql.connector.Error as err:
             print(err)
     cnx.commit()
@@ -135,15 +128,16 @@ def wiki_spider(stop_num, url,cate):
 
 
     def wiki_search(cate_list):
-        print("Initiating Scrape...")
-        print("Starting to scrape {len(cate_list)} pages...")
+        data_list = []
+        print(f"==========   Scraping {len(cate_list)} pages   ==========")
+        print(f"Starting to scrape {len(cate_list)} pages...")
         ct = datetime.datetime.now()
         print("Time at start: ", ct)
 
         for index,el in enumerate(cate_list):
             try:
                 URL= str(f"{url}{el}")
-                print("Trying: ",URL)
+                #print("Trying: ",URL)
                 page = requests.get(URL)
                 soup = BeautifulSoup(page.content, "html.parser")
 
@@ -172,19 +166,31 @@ def wiki_spider(stop_num, url,cate):
                 if title == "Badtitle":
                     title = el
 
-                try:
-                    sql = "INSERT INTO wiki_scraping_data_stage (title,categories,length,type,full_html,timestamp) VALUES (%s,%s,%s,%s,%s,%s)"
-                    val = (str(title),str(cat_list),int(length),str(cate),str(soup),str(datetime.datetime.now()))
-                    cursor.execute(sql, val)
-                    print(f"Data: {title}, {cat_list}, {length} inserted into DB for {URL}")
-                except mysql.connector.Error as err:
-                    print(err)
-            
-            except:
-                pass
-            
-            print(f"Done with {index}/{len(cate_list)}")
-            cnx.commit()
+                da = [str(title),str(cat_list),int(length),str(cate),str(soup),str(datetime.datetime.now())]
+                data_list.append(da)
+                if index  % 100 == 0:
+                    print(f"Data import done for {index} items")
+            except Exception as err:
+                print(err)
+                print("skipping: ",el)
+        
+        print("==========   Inserting data into DB   ==========")
+        for i,el in enumerate(data_list):
+            val = [el[0],el[1],el[2],el[3],el[4],el[5]]
+            sql = "INSERT INTO wiki_scraping_data_stage (title,categories,length,type,full_html,timestamp) VALUES (%s,%s,%s,%s,%s,%s)"
+            try:
+                cursor.execute(sql, val)
+                per = round(100 * (i/len(cate_list)),2)
+                print(f"{per}% Done")
+                if i  % 100 == 0:
+                    print(f"Data import done for {i} items")
+            except mysql.connector.Error as err:
+                print(err)
+        
+        
+        cnx.commit()
+
+
         print("Done scraping!")
         ct = datetime.datetime.now()
         print("Time at end: ", ct)
@@ -197,37 +203,37 @@ def wiki_spider(stop_num, url,cate):
     wiki_search(wiki_names)
 
 # These did not capture full HTML or timestamps
-    #wiki_spider(20000,"https://marvel.fandom.com","marvel")
-    #wiki_spider(20000,"https://sonic.fandom.com","sonic")
-    #wiki_spider(20000,"https://starcraft.fandom.com","starcraft")
-    #wiki_spider(20000,"https://spiderman.fandom.com","spiderman")
-    #wiki_spider(20000,"https://stargate.fandom.com","stargate")
-    #wiki_spider(20000,"https://starwars.fandom.com","starwars")
-    #wiki_spider(20000,"https://fantendo.fandom.com","fantendo")
-    #wiki_spider(20000,"https://femalevillains.fandom.com","femalevillains")
-    #wiki_spider(20000,"https://fightingfantasy.fandom.com","fightingfantasy")
-    #wiki_spider(20000,"https://finalfantasy.fandom.com","finalfantasy")
-    #wiki_spider(20000,"https://ffxiclopedia.fandom.com","ffxiclopedia")
-    #wiki_spider(20000,"https://fireemblem.fandom.com","fireemblem")
-    #wiki_spider(20000,"https://forgottenrealms.fandom.com","forgottenrealms")
+wiki_spider(20000,"https://marvel.fandom.com","marvel")
+wiki_spider(20000,"https://sonic.fandom.com","sonic")
+wiki_spider(20000,"https://starcraft.fandom.com","starcraft")
+wiki_spider(20000,"https://spiderman.fandom.com","spiderman")
+wiki_spider(20000,"https://stargate.fandom.com","stargate")
+wiki_spider(20000,"https://starwars.fandom.com","starwars")
+wiki_spider(20000,"https://fantendo.fandom.com","fantendo")
+wiki_spider(20000,"https://femalevillains.fandom.com","femalevillains")
+wiki_spider(20000,"https://fightingfantasy.fandom.com","fightingfantasy")
+wiki_spider(20000,"https://finalfantasy.fandom.com","finalfantasy")
+wiki_spider(20000,"https://ffxiclopedia.fandom.com","ffxiclopedia")
+wiki_spider(20000,"https://fireemblem.fandom.com","fireemblem")
+wiki_spider(20000,"https://forgottenrealms.fandom.com","forgottenrealms")
 
     # These will need to be re-run because of trailing /
-        #wiki_spider(20000,"https://wowpedia.fandom.com/","wowpedia")
-        #wiki_spider(20000,"https://runescape.fandom.com/","runescape")
-        #wiki_spider(20000,"https://tvdatabase.fandom.com/","tv")
-        #wiki_spider(20000,"https://tardis.fandom.com/","doctorwho")
-        #wiki_spider(20000,"https://fortnite.fandom.com/","fortnite")
-        #wiki_spider(20000,"https://zelda.fandom.com/","zelda")
+wiki_spider(20000,"https://wowpedia.fandom.com/","wowpedia")
+wiki_spider(20000,"https://runescape.fandom.com/","runescape")
+wiki_spider(20000,"https://tvdatabase.fandom.com/","tv")
+wiki_spider(20000,"https://tardis.fandom.com/","doctorwho")
+wiki_spider(20000,"https://fortnite.fandom.com/","fortnite")
+wiki_spider(20000,"https://zelda.fandom.com/","zelda")
 
 
-#wiki_spider(20000,"https://icehockey.fandom.com","icehockey")
-#wiki_spider(20000,"https://althistory.fandom.com","althistory")
-#wiki_spider(20000,"https://eq2.fandom.com","eq2")
-#wiki_spider(20000,"https://lostmediaarchive.fandom.com","lostmediaarchive")
+wiki_spider(20000,"https://icehockey.fandom.com","icehockey")
+wiki_spider(20000,"https://althistory.fandom.com","althistory")
+wiki_spider(20000,"https://eq2.fandom.com","eq2")
+wiki_spider(20000,"https://lostmediaarchive.fandom.com","lostmediaarchive")
 
 #   Re-run these 
-#wiki_spider(20000,"https://zelda.fandom.com","zelda")
-#wiki_spider(20000,"https://harrypotter.fandom.com","harrypotter")
+wiki_spider(20000,"https://zelda.fandom.com","zelda")
+wiki_spider(20000,"https://harrypotter.fandom.com","harrypotter")
 wiki_spider(20000,"https://callofduty.fandom.com","callofduty")
 
 
